@@ -6,6 +6,7 @@ import { router } from "./Routes/Routes";
 import { HelmetProvider } from "react-helmet-async";
 import AuthProvider from "./providers/AuthProvider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import "sweetalert2/src/sweetalert2.scss";
 
 // Create a client
 const queryClient = new QueryClient();

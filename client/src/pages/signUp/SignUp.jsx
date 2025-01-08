@@ -4,10 +4,16 @@ import { Helmet } from "react-helmet-async";
 import { useContext } from "react";
 import { AuthContext } from "../../providers/AuthProvider";
 import Swal from "sweetalert2";
+import { toast } from "react-toastify";
+import useAxiosPublic from "../../hooks/useAxiosPublic";
+import { imageUpload } from "../../utils/imageUpload";
 
 const SignUp = () => {
-  const { createUser, updateUserProfile } = useContext(AuthContext);
+  const { createUser, updateUserProfile, googleSignIn } =
+    useContext(AuthContext);
   const navigate = useNavigate();
+  const axiosPublic = useAxiosPublic();
+
   const {
     register,
     handleSubmit,
@@ -15,24 +21,54 @@ const SignUp = () => {
     formState: { errors },
   } = useForm();
 
-  const onSubmit = (data) => {
-    createUser(data.email, data.password)
-      .then((result) => {
-        console.log(result.user);
-        updateUserProfile(data.name, data.PhotoUrl)
-          .then(() => {
-            Swal.fire("Sign up Successful!");
-            reset();
-            navigate("/");
-          })
-          .catch((error) => {
-            console.log(error);
-          });
-      })
-      .catch((err) => {
-        console.log(err.message);
-      });
+  const handleGoogleLogin = async () => {
+    try {
+      const result = await googleSignIn();
+      const userInfo = {
+        email: result.user?.email,
+        name: result.user?.displayName,
+      };
+      const res = await axiosPublic.post("/users", userInfo);
+      if (res.data) {
+        toast.success("Registration successful!");
+        navigate("/");
+      }
+    } catch (error) {
+      console.error("Google Sign-In Error:", error);
+      toast.error("Google Sign-In failed. Please try again.");
+    }
   };
+
+  const onSubmit = async (data) => {
+    // Extract image file from the form
+    const imageFile = data.image[0];
+    const photoUrl = await imageUpload(imageFile);
+
+    // Create user and update profile
+    await createUser(data.email, data.password);
+    await updateUserProfile(data.name, photoUrl);
+
+    // Save user info to the database
+    const userInfo = {
+      name: data.name,
+      email: data.email,
+      photo: photoUrl,
+    };
+
+    const res = await axiosPublic.post("/users", userInfo);
+    if (res.data.insertedId) {
+      Swal.fire({
+        position: "top-center",
+        icon: "success",
+        title: "Sign Up successful",
+        showConfirmButton: false,
+        timer: 1500,
+      });
+      reset();
+      navigate("/");
+    }
+  };
+
   return (
     <>
       <Helmet>
@@ -55,7 +91,7 @@ const SignUp = () => {
                   <span className="label-text">Name</span>
                 </label>
                 <input
-                  type="name"
+                  type="text"
                   {...register("name", { required: true })}
                   placeholder="Enter your name"
                   className="input input-bordered"
@@ -66,16 +102,15 @@ const SignUp = () => {
               </div>
               <div className="form-control">
                 <label className="label">
-                  <span className="label-text">Photo URL</span>
+                  <span className="label-text">Photo</span>
                 </label>
                 <input
-                  type="url"
-                  {...register("PhotoUrl", { required: true })}
-                  placeholder="Enter PhotoUrl"
+                  type="file"
+                  {...register("image", { required: true })}
                   className="input input-bordered"
                 />
-                {errors.name && (
-                  <span className="text-red-600">PhotoUrl is required</span>
+                {errors.image && (
+                  <span className="text-red-600">Photo is required</span>
                 )}
               </div>
               <div className="form-control">
@@ -84,7 +119,7 @@ const SignUp = () => {
                 </label>
                 <input
                   type="email"
-                  placeholder="email"
+                  placeholder="Enter your email"
                   {...register("email", { required: true })}
                   className="input input-bordered"
                 />
@@ -98,7 +133,7 @@ const SignUp = () => {
                 </label>
                 <input
                   type="password"
-                  placeholder="password"
+                  placeholder="Enter your password"
                   {...register("password", {
                     required: true,
                     minLength: 6,
@@ -107,28 +142,36 @@ const SignUp = () => {
                   className="input input-bordered"
                 />
                 {errors.password?.type === "required" && (
-                  <p className="text-rose-600">Password is required</p>
+                  <p className="text-red-600">Password is required</p>
                 )}
                 {errors.password?.type === "minLength" && (
-                  <p className="text-rose-600">Password must be 6 characters</p>
+                  <p className="text-red-600">Password must be 6 characters</p>
                 )}
                 {errors.password?.type === "pattern" && (
-                  <p className="text-rose-600">
-                    Password must be One Uppercase, One lowercase, One Special
-                    Characater
+                  <p className="text-red-600">
+                    Password must include one uppercase, one lowercase, and one
+                    special character.
                   </p>
                 )}
               </div>
               <div className="form-control mt-6">
-                <button className="btn btn-primary">Sign Up</button>
+                <button type="submit" className="btn btn-primary">
+                  Sign Up
+                </button>
               </div>
             </form>
-            <p className="text-center mb-4">
-              New here?
-              <Link to="/login" className="underline underline-offset-4 ml-2">
-                login
+            <div className="divider">or</div>
+            <p className="text-center">
+              Already have an account?{" "}
+              <Link to="/login" className="underline">
+                Login
               </Link>
             </p>
+            <div className="text-center mt-4">
+              <button onClick={handleGoogleLogin} className="btn btn-outline">
+                Sign Up with Google
+              </button>
+            </div>
           </div>
         </div>
       </div>

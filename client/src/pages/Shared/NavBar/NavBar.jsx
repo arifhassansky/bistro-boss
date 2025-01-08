@@ -78,12 +78,12 @@ const NavBar = () => {
           <ul className="menu menu-horizontal px-1">{navOptions}</ul>
         </div>
         <div className="navbar-end">
-          <div className="mr-4 relative">
+          <Link to="dashboard/cart" className="mr-4 relative">
             <IoCartSharp size={30} />
             <div className="absolute -top-2 -right-1 w-4 h-4 rounded-full bg-green-500 text-white flex items-center justify-center">
               {cart?.length}
             </div>
-          </div>
+          </Link>
           <img className="w-12 rounded-full" src={user?.photoURL} />
         </div>
       </div>

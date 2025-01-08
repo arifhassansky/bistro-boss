@@ -8,16 +8,33 @@ import { AuthContext } from "../../providers/AuthProvider";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import Swal from "sweetalert2";
+import { toast } from "react-toastify";
+import useAxiosPublic from "../../hooks/useAxiosPublic";
 
 const Login = () => {
-  const { signIn } = useContext(AuthContext);
+  const { signIn, googleSignIn } = useContext(AuthContext);
   const [capcha, setCapcha] = useState("");
   const navigate = useNavigate();
-
   const location = useLocation();
-
   const from = location.state?.from?.pathname || "/";
+  const axiosPublic = useAxiosPublic();
 
+  const handleGoogleLogin = () => {
+    googleSignIn()
+      .then((result) => {
+        const userInfo = {
+          email: result.user?.email,
+          name: result.user?.displayName,
+        };
+
+        axiosPublic.post("/users", userInfo).then((res) => {
+          console.log(res.data);
+          toast.success("Register Successfull!");
+          navigate("/");
+        });
+      })
+      .catch(() => {});
+  };
   useEffect(() => {
     loadCaptchaEnginge(6);
   }, []);
@@ -123,11 +140,20 @@ const Login = () => {
                 </button>
               </div>
             </form>
+            <div className="divider">or</div>
             <p className="text-center mb-4">
               New here?
-              <Link to="/signUp" className="underline underline-offset-4">
+              <Link to="/signUp" className="underline underline-offset-4 ml-2">
                 Sign Up
               </Link>
+              <div className="text-center my-4">
+                <button onClick={handleGoogleLogin} type="submit">
+                  <img
+                    className="w-10 h-10"
+                    src="https://i.ibb.co.com/dK5ntqv/icons8-google-48.png"
+                  />
+                </button>
+              </div>
             </p>
           </div>
         </div>

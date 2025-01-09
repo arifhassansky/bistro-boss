@@ -84,7 +84,11 @@ const NavBar = () => {
               {cart?.length}
             </div>
           </Link>
-          <img className="w-12 rounded-full" src={user?.photoURL} />
+          <img
+            className="w-12 rounded-full"
+            referrerPolicy="no-referrer"
+            src={user?.photoURL}
+          />
         </div>
       </div>
     </>

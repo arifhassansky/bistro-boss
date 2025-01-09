@@ -29,7 +29,7 @@ const Login = () => {
 
         axiosPublic.post("/users", userInfo).then((res) => {
           console.log(res.data);
-          toast.success("Register Successfull!");
+          toast.success("Login Successfull!");
           navigate("/");
         });
       })
@@ -52,23 +52,7 @@ const Login = () => {
 
     signIn(email, password)
       .then(() => {
-        Swal.fire({
-          title: "Login Successful",
-          showClass: {
-            popup: `
-              animate__animated
-              animate__fadeInUp
-              animate__faster
-            `,
-          },
-          hideClass: {
-            popup: `
-              animate__animated
-              animate__fadeOutDown
-              animate__faster
-            `,
-          },
-        });
+        toast.success("Login Successfull!");
         navigate(from, { replace: true });
       })
       .catch((err) => {

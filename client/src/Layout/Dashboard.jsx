@@ -15,8 +15,6 @@ const Dashboard = () => {
   const [cart] = useCart();
   const [isAdmin] = useAdmin();
 
-  console.log(isAdmin);
-
   return (
     <div className="flex">
       {/* dashboard side bar */}
@@ -40,7 +38,7 @@ const Dashboard = () => {
               <li>
                 <NavLink
                   className="flex items-center gap-1"
-                  to="/dashboard/additems"
+                  to="/dashboard/additem"
                 >
                   <FaUtensils size={20} /> Add Items
                 </NavLink>
@@ -159,7 +157,7 @@ const Dashboard = () => {
       </div>
 
       {/* dashboard content */}
-      <div className="flex-1 p-16">
+      <div className="flex-1">
         <Outlet />
       </div>
     </div>

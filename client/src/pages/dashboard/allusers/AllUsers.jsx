@@ -69,7 +69,7 @@ const AllUsers = () => {
   };
 
   return (
-    <div>
+    <div className="p-16">
       {/* section header */}
       <div className="flex justify-between">
         <h3 className="text-3xl font-semibold">All Users</h3>

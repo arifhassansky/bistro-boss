@@ -2,10 +2,13 @@ import SectionTitle from "../../../components/SectionTitle/SectionTitle";
 import { useForm } from "react-hook-form";
 import { FaUtensils } from "react-icons/fa";
 import useAxiosPublic from "../../../hooks/useAxiosPublic";
+import useAxiosSecure from "../../../hooks/useAxiosSecure";
+import Swal from "sweetalert2";
 
 const AddItem = () => {
   const axiosPublic = useAxiosPublic();
-  const { register, handleSubmit } = useForm();
+  const axiosSecure = useAxiosSecure();
+  const { register, handleSubmit, reset } = useForm();
 
   const onSubmit = async (data) => {
     const imageFile = { image: data.image[0] };
@@ -18,7 +21,28 @@ const AddItem = () => {
         },
       }
     );
-    console.log(res.data);
+    const menuItem = {
+      name: data.name,
+      recipe: data.recipe,
+      image: res.data.data.display_url,
+      category: data.category,
+      price: data.price,
+    };
+    if (res.data.success) {
+      const menuRes = await axiosSecure.post("/menu", menuItem);
+      console.log(menuRes.data);
+      if (menuRes.data.insertedId) {
+        reset();
+
+        Swal.fire({
+          position: "top-center",
+          icon: "success",
+          title: `${data.name} is successfully added to the menu item`,
+          showConfirmButton: false,
+          timer: 1500,
+        });
+      }
+    }
   };
 
   return (

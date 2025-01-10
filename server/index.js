@@ -21,6 +21,7 @@ const verifyToken = (req, res, next) => {
       return res.status(401).send({ message: "forbidden access" });
     }
     req.decoded = decoded;
+
     next();
   });
 };
@@ -56,6 +57,7 @@ async function run() {
     // verify a user admin or not
     const verifyAdmin = async (req, res, next) => {
       const email = req.decoded.email;
+
       const query = { email };
       const user = await usersCollection.findOne(query);
       const isAdmin = user?.role == "admin";
@@ -78,7 +80,6 @@ async function run() {
     // create user
     app.post("/users", async (req, res) => {
       const user = req.body;
-      console.log("user", user);
       const query = { email: user.email };
       const isExists = await usersCollection.findOne(query);
 
@@ -137,6 +138,21 @@ async function run() {
     //   get all menu items
     app.get("/menu", async (req, res) => {
       const result = await menuCollection.find().toArray();
+      res.send(result);
+    });
+
+    // post menu item
+    app.post("/menu", verifyToken, verifyAdmin, async (req, res) => {
+      const item = req.body;
+      const result = await menuCollection.insertOne(item);
+      res.send(result);
+    });
+
+    // delete a menu
+    app.delete("/menu/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await menuCollection.deleteOne(query);
       res.send(result);
     });
 
